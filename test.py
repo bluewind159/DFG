@@ -6,7 +6,7 @@ import argparse
 import os
 from train import BertDataset
 from eval import evaluate
-from model.contrast_test_more_dropout import ContrastModel
+from model.contrast_model import ContrastModel
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', type=str, default='cuda')
