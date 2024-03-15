@@ -80,11 +80,11 @@ python train.py --data WebOfScience --name test --batch 12 --data WebOfScience -
 
 ## other train file
 The other training codes are as follows, the parameter and usage is same as train.py
-* train_freeze.py freeze the HGCLR only train the DFG
+* train_freeze*.py freeze the HGCLR only train the DFG
 * train_subtree.py divide the hierarchical tree into subtrees and apply DFG on the subtrees
 * train_origin.py original HGCLR without DFG
 * train_scibert.py finetune the scibert for classification
-
+* train_more_decoder.py each label classification use a single decoder rather than all label classification share same decoder
 
 ### Reproducibility
 
