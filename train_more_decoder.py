@@ -7,7 +7,7 @@ from tqdm import tqdm
 import argparse
 import os
 from eval import evaluate
-from model.contrast_freeze_more_decoder import ContrastModel
+from model.contrast_more_decoder import ContrastModel
 
 import utils
 
