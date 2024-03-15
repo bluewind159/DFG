@@ -112,7 +112,7 @@ if __name__ == '__main__':
                                           lamb=args.lamb, threshold=args.thre, tau=args.tau)
     checkpoint = torch.load('./checkpoints/rcv1-test_more_dropout/checkpoint_best_macro.pt')
     model.load_state_dict(checkpoint['param'])
-    from get_trans_model_normal import get_trans_model
+    from get_trans_model_new import get_trans_model
     from get_recons_model_new import get_recons_model
     from train_grad_MIE import MINE_DV, MINE_NWJ, MIGE, infoNCE, MINE_NWJ_sim
     MINE=MINE_NWJ()   
