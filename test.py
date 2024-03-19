@@ -6,7 +6,7 @@ import argparse
 import os
 from train import BertDataset
 from eval import evaluate
-from model.contrast_model import ContrastModel
+from model.contrast_test import ContrastModel
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', type=str, default='cuda')
@@ -16,11 +16,11 @@ parser.add_argument('--extra', default='_macro', choices=['_macro', '_micro'], h
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    checkpoint = torch.load(os.path.join('checkpoints', args.name, 'checkpoint_best{}.pt'.format(args.extra)),
+    checkpoint = torch.load(os.path.join('checkpoints', args.name, 'checkpoint_best{}_split.pt'.format(args.extra)),
                             map_location='cpu')
-    checkpoint_gen = torch.load(os.path.join('checkpoints', args.name, 'checkpoint_best{}_gen.pt'.format(args.extra)),
+    checkpoint_gen = torch.load(os.path.join('checkpoints', args.name, 'checkpoint_best{}_gen_split.pt'.format(args.extra)),
                             map_location='cpu')
-    print('load model from',os.path.join('checkpoints', args.name, 'checkpoint_best{}.pt'.format(args.extra)))
+    print('load model from',os.path.join('checkpoints', args.name, 'checkpoint_best{}_split.pt'.format(args.extra)))
     batch_size = args.batch
     device = args.device
     extra = args.extra
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     model.load_state_dict(checkpoint['param'])
 
     model.to(device)
-    from get_trans_model_normal import get_trans_model
+    from get_trans_model_new import get_trans_model
     from get_recons_model_normal import get_recons_model
     from train_grad_MIE import MINE_DV, MINE_NWJ, MIGE, infoNCE, MINE_NWJ_sim
     model_gen,tokenizer_gen,optimizer_gen=get_trans_model(args,size1=768,size2=768, num=len(label_dict))
@@ -80,8 +80,7 @@ if __name__ == '__main__':
                 pred.append(torch.sigmoid(l).tolist())
 
     pbar.close()
-    for threshold in range(81):
-        scores = evaluate(pred, truth, label_dict, threshold=(20+threshold)/100)
-        macro_f1 = scores['macro_f1']
-        micro_f1 = scores['micro_f1']
-        print('threshold', (20+threshold)/100,'macro', macro_f1, 'micro', micro_f1)
+    scores = evaluate(pred, truth, label_dict, threshold=(20+threshold)/100)
+    macro_f1 = scores['macro_f1']
+    micro_f1 = scores['micro_f1']
+    print('macro:', macro_f1, 'micro:', micro_f1)
