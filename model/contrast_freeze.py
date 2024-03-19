@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from .graph_normal import GraphEncoder
+from .graph import GraphEncoder
 from .graph_split import GraphEncoder as GraphSplitEncoder
 from GAT_layers import gumbel_sigmoid
 
@@ -323,9 +323,7 @@ class ContrastModel(BertPreTrainedModel):
 
         self.graph_encoder = GraphEncoder(config, graph, layer=layer, data_path=data_path, threshold=threshold, tau=tau)
         self.graph_split = GraphSplitEncoder(config, graph, layer=layer, data_path=data_path)
-        #self.graph_split233 = GraphSplitEncoder(config, graph, layer=layer, data_path=data_path)
-        print('original loss function !!!!!!!!')
-        print('This is real split voteing, use the model trans[-1] as the classifier')
+        self.graph_split233 = GraphSplitEncoder(config, graph, layer=layer, data_path=data_path)
         self.lamb = lamb
 
         self.init_weights()
@@ -370,7 +368,7 @@ class ContrastModel(BertPreTrainedModel):
         loss = 0
         contrastive_loss = None
         contrast_logits = None
-        logits = adv_trans[-1](pooled_output)
+        logits = self.classifier(pooled_output)
 
         if labels is not None:
             if not self.multi_label:
@@ -397,19 +395,15 @@ class ContrastModel(BertPreTrainedModel):
                     neg_temp.append(neg_qwer.unsqueeze(1))
                 pos_temp=torch.cat(pos_temp,dim=1)
                 neg_temp=torch.cat(neg_temp,dim=1)
-                logits_split=adv_trans[-1](pos_temp).mean(1)
-                loss_split=layer_count*loss_fct(logits_split, target)
-                recons_result=recons(neg_temp,target,self.bert,self.bert)
+                logits_split=self.classifier_single(pos_temp)
+                logits_final=logits_split
+                loss_split=layer_count*loss_fct(logits_split[:,:,0], target)
+                recons_result=recons(neg_temp,target, lambda x: self.bert.embeddings(x)[0])
                 recons_loss=nn.MSELoss()(recons_result,pooled_output.detach().unsqueeze(1).repeat(1,recons_result.size(1),1))
-                #print('no graph finetune origin!!!')
-                #assert 0==1
-                final_features = self.graph_split(pos_temp, labels, lambda x: self.bert.embeddings(x)[0])
-                final_features = self.graph_split(final_features, labels, lambda x: self.bert.embeddings(x)[0])
-                #final_features = self.graph_split233(final_features, labels, lambda x: self.bert.embeddings(x)[0])
-                #final_features = self.graph_split233(final_features, labels, lambda x: self.bert.embeddings(x)[0])
-                #final_features = self.graph_split233(final_features, labels, lambda x: self.bert.embeddings(x)[0])
-                logits_final=adv_trans[-1](final_features).mean(1)
-                loss_final=layer_count*loss_fct(logits_final, target)
+                final_features = self.graph_split233(pos_temp, labels, lambda x: self.bert.embeddings(x)[0])
+                final_features = self.graph_split233(final_features, labels, lambda x: self.bert.embeddings(x)[0])
+                logits_final=self.classifier_single(final_features)
+                loss_final=layer_count*loss_fct(logits_final[:,:,0], target)
                 loss += loss_final+loss_split+layer_count*0.03*(disen_loss+recons_loss)
             ########################################################################################
             if self.cls_loss:

@@ -314,7 +314,6 @@ class ContrastModel(BertPreTrainedModel):
         self.classifier = nn.Linear(config.hidden_size, config.num_labels)
         self.classifier_single = nn.Linear(config.hidden_size, 1)
         self.bert = BertModel(config)
-        self.bert_freeze = BertModel(config)
         self.pooler = BertPoolingLayer(config, 'cls')
         self.contrastive_lossfct = NTXent(config)
         self.MI = NTXent(config)
@@ -392,12 +391,12 @@ class ContrastModel(BertPreTrainedModel):
                     disen_loss+=self.MI(torch.cat([pos_qwer,neg_qwer],dim=0))/layer_count
                     pos_temp.append(pos_qwer.unsqueeze(1))
                     neg_temp.append(neg_qwer.unsqueeze(1))
-                pos_temp=self.dropout(torch.cat(pos_temp,dim=1))
-                neg_temp=self.dropout(torch.cat(neg_temp,dim=1))
+                pos_temp=torch.cat(pos_temp,dim=1)
+                neg_temp=torch.cat(neg_temp,dim=1)
                 logits_split=self.classifier_single(pos_temp)
                 logits_final=logits_split
                 loss_split=layer_count*loss_fct(logits_split[:,:,0], target)
-                recons_result=recons(neg_temp,target,self.bert, self.bert_freeze)
+                recons_result=recons(neg_temp,target,lambda x: self.bert.embeddings(x)[0])
                 recons_loss=nn.MSELoss()(recons_result,pooled_output.detach().unsqueeze(1).repeat(1,recons_result.size(1),1))
                 final_features = self.graph_split(pos_temp, labels, lambda x: self.bert.embeddings(x)[0])
                 final_features = self.graph_split(final_features, labels, lambda x: self.bert.embeddings(x)[0])
