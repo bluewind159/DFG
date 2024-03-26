@@ -40,7 +40,7 @@ python data_rcv1.py
 
 ### BGC
 
-The original dataset can be acquired [here](https://www.inf.uni-hamburg.de/en/inst/ab/lt/resources/data/blurb-genre-collection.html) by signing an agreement.
+The original dataset can be acquired [here](https://www.inf.uni-hamburg.de/en/inst/ab/lt/resources/data/blurb-genre-collection.html).
 
 ```shell
 cd ./data/rcv1
