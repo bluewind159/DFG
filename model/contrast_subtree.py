@@ -468,6 +468,12 @@ class ContrastModel(BertPreTrainedModel):
                 loss_split=layer_count*loss_fct(logits_split[:,:,0], target)
                 recons_result=recons(all_features_neg,target,lambda x: self.bert.embeddings(x)[0])
                 recons_loss=nn.MSELoss()(recons_result,pooled_output.detach().unsqueeze(1).repeat(1,recons_result.size(1),1))
+                ########
+                disen_pos=0
+                for batch_idx in range(pos_temp.size(0)):
+                    disen_pos+=self.MI(torch.cat([pos_temp[batch_idx,target[batch_idx]==1],recons.label_emb[batch_idx,target[batch_idx]==1]],dim=0))
+                disen_pos=disen_pos/pos_temp.size(0)
+                ########
                 final_features = self.graph_split233(all_features_pos, labels, lambda x: self.bert.embeddings(x)[0])
                 final_features = self.graph_split233(final_features, labels, lambda x: self.bert.embeddings(x)[0])
                 #final_features = self.graph_split233(final_features, labels, lambda x: self.bert.embeddings(x)[0])
@@ -478,7 +484,7 @@ class ContrastModel(BertPreTrainedModel):
                     logits_final.append(self.classifier_single[ww](final_features[:,ww,:]))
                 logits_final=torch.cat(logits_final,dim=-1).unsqueeze(-1)
                 loss_final=layer_count*loss_fct(logits_final[:,:,0], target)
-                loss += loss_final+loss_split+layer_count*0.03*(disen_loss+recons_loss)
+                loss += loss_final+loss_split+layer_count*0.1*(disen_pos-disen_loss)+layer_count*recons_loss
             ########################################################################################
             if self.cls_loss:
                 if self.num_labels == 1:

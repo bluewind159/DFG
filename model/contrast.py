@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from .graph import GraphEncoder
+from .graph_normal import GraphEncoder
 from .graph_split import GraphEncoder as GraphSplitEncoder
 from GAT_layers import gumbel_sigmoid
 
@@ -314,6 +314,7 @@ class ContrastModel(BertPreTrainedModel):
         self.classifier = nn.Linear(config.hidden_size, config.num_labels)
         self.classifier_single = nn.Linear(config.hidden_size, 1)
         self.bert = BertModel(config)
+        #self.bert_freeze = BertModel(config)
         self.pooler = BertPoolingLayer(config, 'cls')
         self.contrastive_lossfct = NTXent(config)
         self.MI = NTXent(config)
@@ -398,11 +399,17 @@ class ContrastModel(BertPreTrainedModel):
                 loss_split=layer_count*loss_fct(logits_split[:,:,0], target)
                 recons_result=recons(neg_temp,target,lambda x: self.bert.embeddings(x)[0])
                 recons_loss=nn.MSELoss()(recons_result,pooled_output.detach().unsqueeze(1).repeat(1,recons_result.size(1),1))
+                ########
+                disen_pos=0
+                for batch_idx in range(pos_temp.size(0)):
+                    disen_pos+=self.MI(torch.cat([pos_temp[batch_idx,target[batch_idx]==1],recons.label_emb[batch_idx,target[batch_idx]==1]],dim=0))
+                disen_pos=disen_pos/pos_temp.size(0)
+                ########
                 final_features = self.graph_split(pos_temp, labels, lambda x: self.bert.embeddings(x)[0])
                 final_features = self.graph_split(final_features, labels, lambda x: self.bert.embeddings(x)[0])
                 logits_final=self.classifier_single(final_features)
                 loss_final=layer_count*loss_fct(logits_final[:,:,0], target)
-                loss += loss_final+loss_split+layer_count*0.03*(disen_loss+recons_loss)
+                loss += loss_final+loss_split+layer_count*0.1*(disen_pos-disen_loss)+layer_count*recons_loss
             ########################################################################################   
             if self.cls_loss:
                 if self.num_labels == 1:
@@ -426,7 +433,7 @@ class ContrastModel(BertPreTrainedModel):
                 #label embedding先根据层次图GAT,然后和输入cross_attention得到概率
                 #大于阈值并且标签为1的概率contrast_mask也为1
                 contrast_mask = self.graph_encoder(outputs['inputs_embeds'],
-                                                   attention_mask, labels, self.bert, self.bert_freeze)
+                                                   attention_mask, labels, lambda x: self.bert.embeddings(x)[0])
                 #embedding weight直接乘上输入的embedding，代表和标签无关的token会被直接屏蔽
                 contrast_output = self.bert(
                     input_ids,
