@@ -2,7 +2,6 @@
 
 This repository implements add Disentagled Feature Graph in HGCLR for Hierarchical Text Classification. 
 Our codes and datasets is based on https://github.com/wzh9969/contrastive-htc. 
-The parameters of DFG are fixed and not adjusted, while other parameters follow the parameters of HGCLR
 
 ## Requirements
 
@@ -16,7 +15,7 @@ The parameters of DFG are fixed and not adjusted, while other parameters follow 
 
 ## Preprocess
 
-Please download the original dataset and then use these scripts.
+Please download the original dataset and then use these scripts. The NYT dataset in HGCLR is withdrawed by the publisher, so we add BGC dataset for experiments.
 
 ### WebOfScience
 
@@ -37,6 +36,16 @@ The preprocess code could refer to the [repository of reuters_loader](https://gi
 cd ./data/rcv1
 python preprocess_rcv1.py
 python data_rcv1.py
+```
+
+### BGC
+
+The original dataset can be acquired [here](https://www.inf.uni-hamburg.de/en/inst/ab/lt/resources/data/blurb-genre-collection.html) by signing an agreement.
+
+```shell
+cd ./data/rcv1
+python get_tree.py
+python data_bgc.py
 ```
 
 ## Train
@@ -79,7 +88,7 @@ python train.py --data WebOfScience --name test --batch 12 --data WebOfScience -
 ```
 
 ## other train file
-The other training codes are as follows, the parameter and usage is same as train.py
+The other training codes are as follows, the argumets and usage is same as train.py
 * train_freeze*.py freeze the HGCLR only train the DFG
 * train_subtree.py divide the hierarchical tree into subtrees and apply DFG on the subtrees
 * train_origin.py original HGCLR without DFG
