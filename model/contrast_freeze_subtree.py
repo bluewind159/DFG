@@ -484,7 +484,7 @@ class ContrastModel(BertPreTrainedModel):
                     logits_final.append(self.classifier_single[ww](final_features[:,ww,:]))
                 logits_final=torch.cat(logits_final,dim=-1).unsqueeze(-1)
                 loss_final=layer_count*loss_fct(logits_final[:,:,0], target)
-                 loss += loss_final+loss_split+layer_count*0.1*(disen_pos-disen_loss)+layer_count*recons_loss
+                loss += loss_final+loss_split+layer_count*0.1*(disen_pos-disen_loss)+layer_count*recons_loss
             ########################################################################################
             if self.cls_loss:
                 if self.num_labels == 1:
