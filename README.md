@@ -51,13 +51,13 @@ python data_bgc.py
 ## Train
 
 ```
-usage: train.py [-h] [--lr LR] [--data {WebOfScience,nyt,rcv1}] [--batch BATCH] [--early-stop EARLY_STOP] [--device DEVICE] --name NAME [--update UPDATE] [--warmup WARMUP] [--contrast CONTRAST] [--graph GRAPH] [--layer LAYER]
+usage: train.py [-h] [--lr LR] [--data {WebOfScience,BGC,rcv1}] [--batch BATCH] [--early-stop EARLY_STOP] [--device DEVICE] --name NAME [--update UPDATE] [--warmup WARMUP] [--contrast CONTRAST] [--graph GRAPH] [--layer LAYER]
                 [--multi] [--lamb LAMB] [--thre THRE] [--tau TAU] [--seed SEED] [--wandb]
 
 optional arguments:
   -h, --help            show this help message and exit
   --lr LR               Learning rate.
-  --data {WebOfScience,nyt,rcv1}
+  --data {WebOfScience,BGC,rcv1}
                         Dataset.
   --batch BATCH         Batch size.
   --early-stop EARLY_STOP
@@ -106,18 +106,10 @@ train.py --batch 12 --lamb 0.05 --thre 0.02 --seed 3
 ```
 WOS: lambda 0.05 thre 0.02
 RCV1: lambda 0.3 thre 0.001
+BGC: lambda 0.3 thre 0.001
 ```
 
 We experiment on GeForce RTX 3090 (24G) with CUDA version $11.2$.
-
-* The following settings can achieve higher results with unfixed seed (which we reported in the paper) .
-
-```
-WOS: lambda 0.1 thre 0.02
-RCV1: lambda 0.3 thre 0.005
-```
-
-* We also find that a higher `tau` (e.g. `tau=2`) is beneficial but we keep it to $1$ for simplicity.
 
 ## Test
 
