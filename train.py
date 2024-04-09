@@ -122,9 +122,8 @@ if __name__ == '__main__':
     if args.wandb:
         wandb.watch(model)
     split = torch.load(os.path.join(data_path, 'split.pt'))
-    train = Subset(dataset, split['train']+split['val'])
-    dev = Subset(dataset, split['test'])
-    test = Subset(dataset, split['test'])
+    train = Subset(dataset, split['train'])
+    dev = Subset(dataset, split['val'])
     for n,p in model.named_parameters():
         if 'bert_freeze'in n:
             p.requires_grad=False
