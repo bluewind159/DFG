@@ -128,9 +128,8 @@ if __name__ == '__main__':
     if args.wandb:
         wandb.watch(model)
     split = torch.load(os.path.join(data_path, 'split.pt'))
-    train = Subset(dataset, split['train']+split['val'])
-    dev = Subset(dataset, split['test'])
-    test = Subset(dataset, split['test'])
+    train = Subset(dataset, split['train'])
+    dev = Subset(dataset, split['val'])
     if args.warmup > 0:
         optimizer = ScheduledOptim(Adam(model.parameters(),
                                         lr=args.lr), args.lr,
