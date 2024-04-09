@@ -43,7 +43,7 @@ python data_rcv1.py
 The original dataset can be acquired [here](https://www.inf.uni-hamburg.de/en/inst/ab/lt/resources/data/blurb-genre-collection.html).
 
 ```shell
-cd ./data/rcv1
+cd ./data/BGC
 python get_tree.py
 python data_bgc.py
 ```
