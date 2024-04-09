@@ -97,7 +97,7 @@ The other training codes are as follows, the argumets and usage is same as train
 
 ### Reproducibility
 
-Contrastive learning is sensitive to hyper-parameters. We report results with fixed random seed but we observe higher results with unfixed seed.
+Contrastive learning is sensitive to hyper-parameters. We report results with fixed random seed.
 
 * The results reported in the main table can be observed with following settings under `seed=3`.
 
